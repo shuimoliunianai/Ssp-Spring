@@ -1,6 +1,6 @@
-import interceptors.RequestProcessingTimeInterceptor;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
+import org.gameloft.www.interceptors.RequestProcessingTimeInterceptor;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
@@ -12,7 +12,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
  */
 @Configuration
 @EnableWebMvc
-@ComponentScan("controller")
+@ComponentScan("org.gameloft.www")
 public class RestServiceConfiguration extends WebMvcConfigurerAdapter {
     private static Logger logger = LogManager.getLogger(RestServiceConfiguration.class);
 

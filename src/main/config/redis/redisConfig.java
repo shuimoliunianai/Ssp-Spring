@@ -1,4 +1,4 @@
-package config.redis;
+package redis;
 
 /**
  * Created by apple on 16/9/21.
@@ -12,7 +12,6 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import redis.clients.jedis.JedisPoolConfig;
@@ -31,7 +30,7 @@ public class redisConfig {
     public redisConfig()
     {
 
-        logger.info("Start init redis  ");
+        logger.info("Start init testRedis  ");
     }
     @Bean
     public RedisConnectionFactory redisCf()

@@ -1,10 +1,9 @@
-package controller;
+package org.gameloft.www.controller;
 
-import model.TestModel;
+import org.gameloft.www.model.Response;
 import org.apache.log4j.Logger;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -25,11 +24,10 @@ public class TestController {
             value = {"/"},
             method = {RequestMethod.GET}
     )
-    public TestModel index()
+    public Response index()
     {
-        TestModel testModel = new TestModel();
-        testModel.setName("daozi");
-        testModel.setAge("12");
-        return testModel;
+        Response response = new Response();
+        response.setContent("false request");
+        return response;
     }
 }

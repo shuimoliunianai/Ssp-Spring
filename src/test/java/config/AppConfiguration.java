@@ -1,8 +1,7 @@
 package config;
 
-import config.redis.redisConfig;
+import config.testRedis.redisConfig;
 import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
