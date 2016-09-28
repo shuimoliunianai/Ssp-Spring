@@ -21,4 +21,5 @@ public class AppConfiguration {
     {
         logger.info("Start init spring ");
     }
+
 }

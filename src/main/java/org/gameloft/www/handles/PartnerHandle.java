@@ -1,6 +1,7 @@
 package org.gameloft.www.handles;
 
 import org.gameloft.www.interfaces.PartnerInterface;
+import org.gameloft.www.lib.HttpClient;
 import org.gameloft.www.model.PartnerRequest;
 import org.gameloft.www.model.PartnerResponse;
 import org.gameloft.www.model.Request;
@@ -57,7 +58,6 @@ public class PartnerHandle {
      */
     public PartnerRequest prepareRequest()
     {
-        stringRedisTemplate.opsForValue().set("aaa","bbb");
         if (this.partnerClass == null || this.partnerObject == null)
         {
             this.loadClass();
@@ -78,7 +78,20 @@ public class PartnerHandle {
      */
     public PartnerResponse processResponse(String response)
     {
-        return null;
+        if(this.partnerClass == null || this.partnerObject == null) {
+            this.loadClass();
+        }
+
+        PartnerResponse processedResponse = null;
+
+        try {
+            Method e = this.partnerClass.getMethod("processResponse", new Class[]{String.class});
+            processedResponse = (PartnerResponse)e.invoke(this.partnerObject, new Object[]{response});
+        } catch (Exception var4) {
+            var4.printStackTrace();
+        }
+
+        return processedResponse;
     }
 
     /**
@@ -108,7 +121,12 @@ public class PartnerHandle {
     public PartnerResponse call()
     {
         PartnerRequest partnerRequest = this.prepareRequest();
-        PartnerResponse partnerResponse = null;
-        return partnerResponse;
+        String response = null;
+        try {
+            response = HttpClient.post(partnerRequest.getUrl(), partnerRequest.getContent());
+        } catch (Throwable throwable) {
+            throwable.printStackTrace();
+        }
+        return response != null && !response.isEmpty()?this.processResponse(response):new PartnerResponse("failed");
     }
 }

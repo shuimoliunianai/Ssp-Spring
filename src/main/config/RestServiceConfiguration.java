@@ -3,6 +3,7 @@ import org.apache.log4j.Logger;
 import org.gameloft.www.interceptors.RequestProcessingTimeInterceptor;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.ImportResource;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
@@ -13,6 +14,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 @Configuration
 @EnableWebMvc
 @ComponentScan("org.gameloft.www")
+@ImportResource({"classpath:spring.xml"})
 public class RestServiceConfiguration extends WebMvcConfigurerAdapter {
     private static Logger logger = LogManager.getLogger(RestServiceConfiguration.class);
 

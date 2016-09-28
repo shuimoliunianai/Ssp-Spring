@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html, charset=UTF-8">
+    <style>
+        html, body, div, span, applet, object, iframe,
+        h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+        a, abbr, acronym, address, big, cite, code,
+        del, dfn, em, img, ins, kbd, q, s, samp,
+        small, strike, strong, sub, sup, tt, var,
+        b, u, i, center,
+        dl, dt, dd, ol, ul, li,
+        fieldset, form, label, legend,
+        table, caption, tbody, tfoot, thead, tr, th, td,
+        article, aside, canvas, details, embed,
+        figure, figcaption, footer, header, hgroup,
+        menu, nav, output, ruby, section, summary,
+        time, mark, audio, video {
+            margin: 0;
+            padding: 0;
+            border: 0;
+            font-size: 100%;
+            font: inherit;
+            vertical-align: baseline;
+        }
+
+        /* HTML5 display-role reset for older browsers */
+        article, aside, details, figcaption, figure,
+        footer, header, hgroup, menu, nav, section {
+            display: block;
+        }
+
+        body {
+            line-height: 1;
+        }
+
+        ol, ul {
+            list-style: none;
+        }
+
+        blockquote, q {
+            quotes: none;
+        }
+
+        blockquote:before, blockquote:after,
+        q:before, q:after {
+            content: '';
+            content: none;
+        }
+
+        table {
+            border-collapse: collapse;
+            border-spacing: 0;
+        }
+
+        a {
+            color: #000000;
+            text-decoration: none;
+            border: 0;
+        }
+
+        #overlay {
+            position: absolute;
+            opacity: 0.8;
+            z-index: 1;
+            width: 0px;
+            height: 0px;
+            background-color: #000000;
+        }
+
+        .advertismentLabel {
+            bottom: 3px;
+            left: 6px;
+            font-family: arial;
+            color: #FFFFFF;
+            z-index: 100000000;
+            font-size: 1.5em;
+            display: block;
+            text-shadow: 1px 1px 5px #000000, -1px -1px 5px #000000, 1px 1px 5px #000000, -1px -1px 5px #000000;
+            position: absolute;
+        }
+
+        /* Small screens */
+        @media only screen {
+            .glftSspAdClose {
+                width: 15px;
+            }
+        } /* Define mobile styles */
+
+        @media only screen and (min-width: 20em) {
+            .glftSspAdClose {
+                width: 30px;
+            }
+        } /* min-width XXXpx, XXX screens */
+
+        /* Medium screens */
+        @media only screen and (min-width: 40em) {
+            .glftSspAdClose {
+                width: 60px;
+            }
+        } /* min-width 641px, medium screens */
+
+        /* Large screens */
+        @media only screen and (min-width: 64em) {
+            .glftSspAdClose {
+                width: 60px;
+            }
+        } /* min-width 1025px, large screens */
+
+        /* XLarge screens */
+        @media only screen and (min-width: 90em) {
+            .glftSspAdClose {
+
+            }
+        } /* min-width 1441px, xlarge screens */
+
+        /* XXLarge screens */
+        @media only screen and (min-width: 120.063em) {
+            .glftSspAdClose {
+
+            }
+        } /* min-width 1921px, xxlarge screens */
+
+        /* GLADS CSS Breakpoints */
+        @media only screen and (min-width: 1px) {
+            body {
+                font-size: 20%
+            }
+        }
+
+        @media only screen and (min-width: 270px) {
+            body {
+                font-size: 35%
+            }
+        }
+
+        @media only screen and (min-width: 320px) {
+            body {
+                font-size: 38%
+            }
+        }
+
+        @media only screen and (min-width: 360px) {
+            body {
+                font-size: 45%
+            }
+        }
+
+        @media only screen and (min-width: 470px) {
+            body {
+                font-size: 48%
+            }
+        }
+
+        @media only screen and (min-width: 470px) and (orientation: portrait) {
+            body {
+                font-size: 55%
+            }
+        }
+
+        @media only screen and (min-width: 570px) {
+            body {
+                font-size: 65%
+            }
+        }
+
+        @media only screen and (min-width: 650px) {
+            body {
+                font-size: 68%
+            }
+        }
+
+        @media only screen and (min-width: 900px) {
+            body {
+                font-size: 81%
+            }
+        }
+
+        @media only screen and (min-width: 1000px) {
+            body {
+                font-size: 84%
+            }
+        }
+
+        @media only screen and (min-width: 1080px) and (orientation: portrait) {
+            body {
+                font-size: 98%
+            }
+        }
+
+        @media only screen and (min-width: 1100px) {
+            body {
+                font-size: 87%
+            }
+        }
+
+        @media only screen and (min-width: 1200px) {
+            body {
+                font-size: 90%
+            }
+        }
+
+        @media only screen and (min-width: 1500px) {
+            body {
+                font-size: 105%
+            }
+        }
+
+        @media only screen and (min-width: 1900px) {
+            body {
+                font-size: 130%
+            }
+        }
+
+        @media only screen and (min-width: 2500px) {
+            body {
+                font-size: 140%
+            }
+        }
+    </style>
+    <script type="text/javascript">
+        var glftSspIHttp = {
+            iReq: function () {
+                if (window.XMLHttpRequest) {
+                    return new XMLHttpRequest()
+                } else {
+                    if (window.ActiveXObject) {
+                        return new ActiveXObject("Microsoft.XMLHTTP")
+                    }
+                }
+                return false
+            }, async: true, call: function (a) {
+                this.request = this.iReq();
+                if (this.request) {
+                    this.request.open("GET", a, this.async);
+                    this.request.send()
+                }
+            }, post: function (a, b) {
+                this.request = this.iReq();
+                if (this.request) {
+                    this.request.open("POST", a, this.async);
+                    this.request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+                    this.request.send(b)
+                }
+            }
+        };
+
+        var glftSspTracker = {
+            track: function (trackingUrl) {
+                try {
+                    glftSspIHttp.call(trackingUrl);
+                    glftSspIHttp.request.timeout = 4000;
+
+                    if (iHttp.request.readyState == 4) {
+                        // do something?
+                    }
+                } catch (e) {
+                }
+            }
+        };
+
+        // Glads impression tracking url
+        var gladsImpressionTrackingUrl = 'http://www.google.ro';
+
+        // Tracking Impression
+        glftSspTracker.track(gladsImpressionTrackingUrl);
+    </script>
+</head>
+<body>
+<div id="overlay"></div>
+<span id="advertismentLabel" class="advertismentLabel">
+        Advertisement
+</span>
+<div id="glftSspContainer" style="position: absolute; z-index: 1000;">
+    $markup
+</div>
+<script type="text/javascript">
+    var glftSspProcessor = {
+        addClose: function (closeImgUrl) {
+            var closeAnchor = document.createElement('a');
+            closeAnchor.href = 'exit:';
+            closeAnchor.style.position = 'absolute';
+            closeAnchor.style.right = 0;
+            closeAnchor.style.top = 0;
+            closeAnchor.style.zIndex = 1000005;
+
+            var closeImage = document.createElement('img');
+            closeImage.src = closeImgUrl;
+            closeImage.id = 'glftSspAdClose';
+            closeImage.className = 'glftSspAdClose';
+            closeImage.style.position = 'relative';
+            closeImage.style.cursor = 'pointer';
+            closeImage.style.right = 0;
+            closeImage.style.top = 0;
+
+            closeAnchor.appendChild(closeImage);
+
+            document.body.appendChild(closeAnchor);
+        }
+    };
+
+    var glftSspAdjuster = {
+        // Core IMG Object
+        IMG_ELEM: 0,
+
+        // Core IMG details - will be adapted on the fly based on detected ratio
+        IMG_HEIGHT: 0,
+        IMG_WIDTH: 0,
+
+        // Resized width/height holders
+        IMG_RESIZED_WIDTH: 0,
+        IMG_RESIZED_HEIGHT: 0,
+
+        // stored viewport dimensions
+        STORED_VIEWPORT_HEIGHT: 0,
+        STORED_VIEWPORT_WIDTH: 0,
+
+        // Viewport dimensions getter
+        getViewportDimensions: function () {
+            var viewportWidth;
+            var viewportHeight;
+
+            // the more standards compliant browsers (mozilla/netscape/opera/IE7) use window.innerWidth and window.innerHeight
+            if (typeof window.innerWidth != 'undefined') {
+                viewportWidth = window.innerWidth;
+                viewportHeight = window.innerHeight;
+            }
+            // IE6 in standards compliant mode (i.e. with a valid doctype as the first line in the document)
+            else if (typeof document.documentElement != 'undefined'
+                    && typeof document.documentElement.clientWidth !=
+                    'undefined' && document.documentElement.clientWidth != 0) {
+                viewportWidth = document.documentElement.clientWidth;
+                viewportHeight = document.documentElement.clientHeight;
+            }
+            // older versions of IE
+            else {
+                viewportWidth = document.getElementsByTagName('body')[0].clientWidth;
+                viewportHeight = document.getElementsByTagName('body')[0].clientHeight;
+            }
+
+            return {
+                width: viewportWidth,
+                height: viewportHeight
+            };
+        },
+
+        processOverlay: function (overlay) {
+            if (typeof overlay.offsetHeight == 'undefined' || overlay.offsetHeight == null ||
+                    typeof overlay.offsetWidth == 'undefined' || overlay.offsetWidth == null
+            ) {
+                overlay.style.display = 'none';
+                return false;
+            }
+
+            viewportDimensions = this.getViewportDimensions();
+
+            var currentViewportHeight = viewportDimensions['height'];
+            var currentViewportWidth = viewportDimensions['width'];
+
+            // Setting overlay
+            overlay.style.height = currentViewportHeight + 'px';
+            overlay.style.width = currentViewportWidth + 'px';
+
+            var _this = this;
+            setTimeout(
+                    function () {
+                        _this.processOverlay(overlay);
+                    },
+                    100
+            );
+        },
+
+        alignSspContainer: function (container) {
+            if (container == null || typeof container == 'undefined') {
+                return false;
+            }
+
+            if (typeof container.offsetHeight == 'undefined' || container.offsetHeight == null ||
+                    typeof container.offsetWidth == 'undefined' || container.offsetWidth == null
+            ) {
+                return false;
+            }
+
+            viewportDimensions = this.getViewportDimensions();
+
+            var currentViewportHeight = viewportDimensions['height'];
+            var currentViewportWidth = viewportDimensions['width'];
+
+            if (currentViewportHeight != this.STORED_VIEWPORT_HEIGHT || currentViewportWidth != this.STORED_VIEWPORT_WIDTH) {
+                // Aligning to center
+                containerTop = Math.round((currentViewportHeight - Math.round(parseInt(container.offsetHeight))) / 2);
+                containerLeft = Math.round((currentViewportWidth - Math.round(parseInt(container.offsetWidth))) / 2);
+
+                container.style.top = containerTop + 'px';
+                container.style.left = containerLeft + 'px';
+
+                // Storing new dimensions
+                this.STORED_VIEWPORT_HEIGHT = currentViewportHeight;
+                this.STORED_VIEWPORT_WIDTH = currentViewportWidth;
+            }
+
+            var _this = this;
+            setTimeout(
+                    function () {
+                        _this.alignSspContainer(container);
+                    },
+                    100
+            );
+        },
+    }
+
+    // Glads click tracking url
+    var gladsClickTrackingUrl = 'http://www.google.ro';
+
+    // Glads close image url
+    var gladsCloseImageUrl = 'http://ingameads.gameloft.com/un/web/fullscreen/images/newIcons/close_button_tp_bg.png';
+
+    // OS
+    var _OS = 'android';
+
+    window.onload = function () {
+        // adjusting 3rd party hrefs
+        adContainer = document.getElementById('glftSspContainer');
+        if (typeof adContainer != 'undefined' && adContainer != '' && adContainer != null) {
+            anchors = adContainer.getElementsByTagName('a');
+            if (typeof anchors != 'undefined' && anchors != '' && anchors != null && anchors.length > 0) {
+                for (var i = 0; i < anchors.length; i++) {
+                    anchors[i].href = 'link:' + anchors[i].href;
+                }
+            }
+        }
+
+        // Tracking click (binding to click)
+        clickableLink = document.getElementById('clickableLink');
+        if (typeof clickableLink != 'undefined' && clickableLink !='' && clickableLink != null) {
+                clickableLink.addEventListener('click', function () {
+            glftSspTracker.track(gladsClickTrackingUrl)
+            }, false);
+        }
+
+        #if ( $closeButton == 'yes' )
+            // Adding close button
+            glftSspProcessor.addClose(gladsCloseImageUrl);
+        #end
+
+
+        sspContainer = document.getElementById('glftSspContainer');
+        glftSspAdjuster.alignSspContainer(sspContainer);
+
+        clickTrackingDone = false;
+        sspContainer.addEventListener('click', function () {
+            if (clickTrackingDone == false) {
+                clickTrackingDone = true;
+                glftSspTracker.track(gladsClickTrackingUrl);
+            }
+        }, false);
+    }
+    var overlay = '$overlay';
+    if (overlay == 'yes') {
+        glftSspAdjuster.processOverlay(document.getElementById('overlay'));
+    }
+</script>
+</body>
+</html>
