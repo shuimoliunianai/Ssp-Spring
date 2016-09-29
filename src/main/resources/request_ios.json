@@ -1,0 +1,55 @@
+{
+  "partners": [
+    {
+      "name": "inmobi",
+      "priority": 12,
+      "creative_ids": [
+        123,
+        234
+      ]
+    }
+  ],
+  "request": {
+    "type": "video",
+    "fullscreen": 1,
+    "width": "480",
+    "height": "320",
+    "country": "CN",
+    "user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 8_2 like Mac OS X) AppleWebKit/600.1.4 (KHTML, like Gecko) Version/8.0 Mobile/12D436 Safari/600.1.4",
+    "os": "ios",
+    "firmware": "9.1",
+    "pkg_name": "com.gameloft.ZooRescueGL",
+    "app_name": "Wonder Zoo",
+    "aaid": "na",
+    "imei": "02:00:00:00:00:00",
+    "wma": "na",
+    "idfa": "4448DBB5-70C6-4834-A8AB-53AE42C6BF5A",
+    "hdidfv": "na",
+    "ip": "150.176.182.31",
+    "conn": "na",
+    "carrier_id": "43",
+    "carrier_name": "China Unicom",
+    "mcc": "460",
+    "mnc": "01",
+    "oid": "na",
+    "shopapp_id": "518313894",
+    "product_id": "1507",
+    "device_lang": "zh-hans-cn",
+    "device_model": "iPhone7,1",
+    "device_time": "2015-12-29 16:49:26",
+    "pricing_model": "CPM",
+    "pricing_model_value": "0.5000",
+    "pricing_currency": "CNY",
+    "gps_acc": "na",
+    "gps_lat": "na",
+    "gps_long": "na",
+    "device_type": "Phone",
+    "gender": "na",
+    "user_age": "33",
+    "game_orientation": "landscape",
+    "mraid": "na",
+    "adspaceid": "na",
+    "ad_size": [],
+    "iv": "0"
+  }
+}
