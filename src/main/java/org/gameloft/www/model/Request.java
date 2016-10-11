@@ -7,6 +7,7 @@ package org.gameloft.www.model;
 
 import com.fasterxml.jackson.annotation.*;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -21,6 +22,7 @@ public class Request {
     @JsonProperty("fullscreen")
     private Integer fullscreen;
     @JsonProperty("width")
+    @NotEmpty(message = "{request.width.empty}")
     private String width;
     @JsonProperty("height")
     private String height;

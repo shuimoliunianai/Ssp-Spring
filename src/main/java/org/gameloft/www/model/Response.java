@@ -1,5 +1,5 @@
 package org.gameloft.www.model;
-
+import org.springframework.validation.annotation.*;
 /**
  * Created by apple on 16/9/27.
  */

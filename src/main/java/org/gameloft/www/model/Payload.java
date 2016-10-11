@@ -10,6 +10,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -23,6 +24,7 @@ public class Payload {
     @JsonProperty("partners")
     private List<Partner> partners = new ArrayList<Partner>();
     @JsonProperty("request")
+    @NotNull(message = "{payload.request.null}")
     private Request request;
     @JsonIgnore
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
