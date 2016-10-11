@@ -1,0 +1,53 @@
+{
+  "partners": [
+    {
+      "name": "inmobi",
+      "priority": 12,
+      "creative_ids": [
+        123,
+        234
+      ]
+    }
+  ],
+  "request": {
+    "type": "video",
+    "fullscreen": 1,
+    "width": "1080",
+    "height": "1776",
+    "country": "CN",
+    "user_agent": "Mozilla/5.0 (Linux; U; Android 4.0.1; ja-jp; Galaxy Nexus Build/ITL41D) AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 Mobile Safari/534.30",
+    "os": "android",
+    "firmware": "4.4.2",
+    "pkg_name": "com.gameloft.ZooRescueGL",
+    "app_name": "Wonder Zoo",
+    "aaid": "na",
+    "imei": "02:00:00:00:00:00",
+    "wma": "na",
+    "idfa": "4448DBB5-70C6-4834-A8AB-53AE42C6BF5A",
+    "hdidfv": "85ffdb38-a307-4349-86e8-b0bf71e52444",
+    "ip": "63.149.98.23",
+    "conn": "na",
+    "carrier_id": "43",
+    "carrier_name": "China Unicom",
+    "mcc": "460",
+    "mnc": "01",
+    "oid": "na",
+    "shopapp_id": "518313894",
+    "product_id": "1910",
+    "device_lang": "zh-hans-cn",
+    "device_model": "LGE_Nexus5",
+    "device_time": "2015-12-29 16:49:26",
+    "pricing_model": "CPM",
+    "pricing_model_value": "0.5000",
+    "pricing_currency": "CNY",
+    "gps_acc": "na",
+    "gps_lat": "na",
+    "gps_long": "na",
+    "device_type": "Phone",
+    "gender": "na",
+    "user_age": "33",
+    "game_orientation": "landscape",
+    "mraid": "na",
+    "iv":"0"
+  }
+}

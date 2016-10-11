@@ -1,0 +1,74 @@
+package org.gameloft.www.partners.inmobi.model;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
+/**
+ * Created by ningzhen.ge on 2016/9/29.
+ */
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonPropertyOrder({"pubContent","adtype","width","height","lp"})
+public class InmobiAd {
+
+    @JsonProperty
+    private String pubContent;
+    @JsonProperty
+    private String adtype;
+    @JsonProperty
+    private Integer width;
+    @JsonProperty
+    private Integer height;
+    @JsonProperty
+    private String lp;
+
+    @JsonProperty
+    public String getPubContent() {
+        return pubContent;
+    }
+
+    @JsonProperty
+    public void setPubContent(String pubContent) {
+        this.pubContent = pubContent;
+    }
+
+    @JsonProperty
+    public String getAdtype() {
+        return adtype;
+    }
+
+    @JsonProperty
+    public void setAdtype(String adtype) {
+        this.adtype = adtype;
+    }
+
+    @JsonProperty
+    public Integer getWidth() {
+        return width;
+    }
+
+    @JsonProperty
+    public void setWidth(Integer width) {
+        this.width = width;
+    }
+
+    @JsonProperty
+    public Integer getHeight() {
+        return height;
+    }
+
+    @JsonProperty
+    public void setHeight(Integer height) {
+        this.height = height;
+    }
+
+    @JsonProperty
+    public String getLp() {
+        return lp;
+    }
+
+    @JsonProperty
+    public void setLp(String lp) {
+        this.lp = lp;
+    }
+}
