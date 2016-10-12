@@ -1,12 +1,15 @@
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.gameloft.www.interceptors.RequestProcessingTimeInterceptor;
+import org.gameloft.www.interceptors.i18nLanguageInterceptors;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportResource;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 
 /**
  * Created by apple on 16/9/21.

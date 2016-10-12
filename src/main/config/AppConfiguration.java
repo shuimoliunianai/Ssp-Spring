@@ -7,10 +7,15 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
+import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
+import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
+import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 import redis.redisConfig;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.Locale;
 
 /**
@@ -31,17 +36,25 @@ public class AppConfiguration {
     {
         LocalValidatorFactoryBean localValidatorFactoryBean = new LocalValidatorFactoryBean();
         localValidatorFactoryBean.setProviderClass(HibernateValidator.class);
-        localValidatorFactoryBean.setValidationMessageSource(reloadableResourceBundleMessageSource());
+        localValidatorFactoryBean.setValidationMessageSource(ResourceBundleMessageSource());
         return localValidatorFactoryBean;
     }
 
     @Bean
-    public ReloadableResourceBundleMessageSource reloadableResourceBundleMessageSource()
+    public ResourceBundleMessageSource ResourceBundleMessageSource()
     {
-        ReloadableResourceBundleMessageSource reloadableResourceBundleMessageSource = new ReloadableResourceBundleMessageSource();
-        reloadableResourceBundleMessageSource.setBasename("classpath*:message");
-        reloadableResourceBundleMessageSource.setUseCodeAsDefaultMessage(false);
-        return reloadableResourceBundleMessageSource;
+        ResourceBundleMessageSource resourceBundleMessageSource = new ResourceBundleMessageSource();
+        resourceBundleMessageSource.setBasename("config/i18n/ValidationMessages");
+        resourceBundleMessageSource.setCacheSeconds(60);
+        resourceBundleMessageSource.setDefaultEncoding("UTF-8");
+        return resourceBundleMessageSource;
     }
 
+    @Bean
+    public SessionLocaleResolver sessionLocaleResolver()
+    {
+        SessionLocaleResolver sessionLocaleResolver = new SessionLocaleResolver();
+        sessionLocaleResolver.setDefaultLocale(Locale.CHINA);
+        return sessionLocaleResolver;
+    }
 }
