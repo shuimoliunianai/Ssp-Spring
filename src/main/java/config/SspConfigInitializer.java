@@ -1,17 +1,18 @@
-
-import javax.servlet.ServletContext;
-import javax.servlet.ServletRegistration;
+package config;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.log4j.PropertyConfigurator;
 import org.springframework.web.WebApplicationInitializer;
 import org.springframework.web.context.ContextLoaderListener;
-import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.RequestContextListener;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
+import org.springframework.web.filter.CharacterEncodingFilter;
 import org.springframework.web.servlet.DispatcherServlet;
-import org.springframework.web.util.Log4jConfigListener;
+
+import javax.servlet.DispatcherType;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletRegistration;
+import java.util.EnumSet;
 
 /**
 /**
@@ -20,15 +21,12 @@ import org.springframework.web.util.Log4jConfigListener;
 public class SspConfigInitializer implements WebApplicationInitializer {
 
     protected Log logger;
-    private boolean registerErrorPageFilter = true;
-    protected AnnotationConfigWebApplicationContext rootContext;
-
 
     @Override
     public void onStartup(ServletContext servletContext) {
         this.logger = LogFactory.getLog(getClass());
-        rootContext = new AnnotationConfigWebApplicationContext();
 
+        registerFilter(servletContext);
         initializeSpringConfig(servletContext);
         initializeSpringMVCConfig(servletContext);
         registerListener(servletContext);
@@ -40,7 +38,8 @@ public class SspConfigInitializer implements WebApplicationInitializer {
      * @param container
      */
     private void initializeSpringConfig(ServletContext container) {
-        this.rootContext.register(AppConfiguration.class);
+        AnnotationConfigWebApplicationContext rootContext = new AnnotationConfigWebApplicationContext();
+        rootContext.register(AppConfiguration.class);
         container.addListener(new ContextLoaderListener(rootContext));
     }
 
@@ -50,9 +49,10 @@ public class SspConfigInitializer implements WebApplicationInitializer {
      * @param container
      */
     private void initializeSpringMVCConfig(ServletContext container) {
-        this.rootContext.register(RestServiceConfiguration.class);
-        ServletRegistration.Dynamic dispatcher = container.addServlet("Dispatcher",
-                new DispatcherServlet(rootContext));
+
+        AnnotationConfigWebApplicationContext Context = new AnnotationConfigWebApplicationContext();
+        Context.register(RestServiceConfiguration.class);
+        ServletRegistration.Dynamic dispatcher = container.addServlet("Dispatcher", new DispatcherServlet(Context));
         dispatcher.setLoadOnStartup(2);
         dispatcher.setAsyncSupported(true);
         dispatcher.addMapping("/*");
@@ -64,6 +64,19 @@ public class SspConfigInitializer implements WebApplicationInitializer {
      */
     private void registerListener(ServletContext container) {
         container.addListener(RequestContextListener.class);
+    }
+
+
+    /**
+     * 注册过滤器
+     */
+    private void registerFilter(ServletContext context)
+    {
+        CharacterEncodingFilter characterEncodingFilter = new CharacterEncodingFilter();
+        characterEncodingFilter.setForceEncoding(true);
+        characterEncodingFilter.setEncoding("UTF-8");
+        javax.servlet.FilterRegistration.Dynamic filter = context.addFilter("encoding",characterEncodingFilter);
+        filter.addMappingForUrlPatterns(EnumSet.of(DispatcherType.REQUEST), true, "/");
     }
 
 }

@@ -1,8 +1,4 @@
-package redis;
-
-/**
- * Created by apple on 16/9/21.
- */
+package config.redis;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +13,7 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 import redis.clients.jedis.JedisPoolConfig;
 
 /**
- * Created by ningzhen.ge on 2016/9/21.
+ * Created by apple on 16/10/20.
  */
 @Configuration
 @PropertySource({"classpath:application.properties"})
@@ -45,7 +41,7 @@ public class redisConfig {
     }
 
     @Bean
-    public  JedisPoolConfig getRedisPoolConfig()
+    public JedisPoolConfig getRedisPoolConfig()
     {
         JedisPoolConfig config = new JedisPoolConfig();
         config.setMaxActive(Integer.parseInt(env.getProperty("spring.redis.pool.max-active")));

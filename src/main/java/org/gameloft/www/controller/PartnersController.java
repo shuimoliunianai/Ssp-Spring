@@ -27,9 +27,9 @@ public class PartnersController {
             produces = {"application/json"}
     )
     public void getAdvertisement(@Valid  @RequestBody Payload payload) {
-//        PartnerResponse partnerResponse = new PartnerResponse();
-//        PartnerHandle partnerHandle = new PartnerHandle(payload.getPartners().get(0).getName(),payload.getRequest());
-//        partnerHandle.call();
+        PartnerResponse partnerResponse = new PartnerResponse();
+        PartnerHandle partnerHandle = new PartnerHandle(payload.getPartners().get(0).getName(),payload.getRequest());
+        partnerHandle.call();
         }
 
 }
