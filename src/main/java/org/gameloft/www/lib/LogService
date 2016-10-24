@@ -1,0 +1,104 @@
+package org.gameloft.www.lib.Logger;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.log4j.Logger;
+import org.springframework.stereotype.Component;
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import java.util.HashMap;
+
+/**
+ * Created by ningzhen.ge on 2016/10/24.
+ */
+@Component
+public class LogService {
+
+    /**
+     * runtime log
+     */
+    private HashMap<String, String> runtimeLog = new HashMap<String, String>();
+
+    /**
+     * Start time
+     */
+    private long startTime;
+
+    /**
+     * log4j
+     */
+    private Logger logger;
+
+    /**
+     * init model
+     */
+    @PostConstruct
+    public void init() {
+        logger = Logger.getLogger(LogService.class);
+        StringBuffer startMessage = new StringBuffer("started logger");
+        this.runtime(startMessage);
+    }
+
+    @PreDestroy
+    /**
+     * destroy
+     */
+    public void destroy() {
+        StringBuffer endMessage = new StringBuffer("shutdown logger");
+        this.runtime(endMessage);
+    }
+
+    /**
+     * run time
+     */
+    private void runtime(Object message) {
+        this.runtimeLog.put(this.getTime(), this.formatMessage(message));
+    }
+
+    /**
+     * get Unix time
+     */
+    private String getTime() {
+        if (this.startTime == 0.00) {
+            this.startTime = Math.round(System.currentTimeMillis() * 1000);
+            return "0.00";
+        }
+        long currentTime = Math.round(System.currentTimeMillis() * 1000);
+        long time = (currentTime - startTime) / 1000;
+        if (time == 0) {
+            return "0.000";
+        }
+        return String.valueOf(time);
+    }
+
+    /**
+     * format messgae
+     */
+    private String formatMessage(Object message) {
+        String jsonMessage = "";
+        if (message.getClass().equals(String.class)) {
+            return String.valueOf(message);
+        }
+        synchronized (this) {
+            try {
+                jsonMessage = new ObjectMapper().writeValueAsString(message);
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+            }
+        }
+        return jsonMessage;
+    }
+
+    /**
+     * Debug log
+     */
+    public void debug(Object message)
+    {
+        String debugMessage = this.formatMessage(message);
+        StringBuffer debugMessageBuffer = new StringBuffer();
+        debugMessageBuffer.append("ssp-debug:");
+        debugMessageBuffer.append("[5]:");
+        debugMessageBuffer.append(debugMessage);
+        logger.info(debugMessageBuffer);
+    }
+}
