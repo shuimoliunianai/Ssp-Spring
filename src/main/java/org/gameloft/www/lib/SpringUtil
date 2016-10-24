@@ -1,0 +1,25 @@
+package org.gameloft.www.lib.Util;
+
+import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+import org.springframework.stereotype.Component;
+
+/**
+ * Created by ningzhen.ge on 2016/10/24.
+ */
+@Component
+public class SpringUtil implements ApplicationContextAware {
+
+    private static ApplicationContext applicationContext;
+
+    public static ApplicationContext getApplicationContext()
+    {
+        return applicationContext;
+    }
+
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException
+    {
+        SpringUtil.applicationContext = applicationContext;
+    }
+}
