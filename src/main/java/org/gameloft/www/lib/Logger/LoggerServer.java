@@ -32,8 +32,8 @@ public class LoggerServer {
     /**
      * HttpServlet
      */
-    @Autowired
-    private HttpServletRequest httpServletRequest;
+//    @Autowired
+//    private HttpServletRequest httpServletRequest;
 
     /**
      * init model
@@ -94,16 +94,16 @@ public class LoggerServer {
      * write log
      */
     public boolean writeLog(String tag, int level, String message) {
-        if (tag.isEmpty() || message.isEmpty()) {
-            return false;
-        }
-        synchronized (this)
-        {
-            String requestUrl = httpServletRequest.getRequestURI();
-            StringBuffer messageLog = httpServletRequest.getRequestURL();
-            messageLog.append("[").append(tag).append("]").append("[level:").append(level).append("]").append("[").append(requestUrl).append("]:").append(message);
-            logger.info(messageLog);
-        }
+//        if (tag.isEmpty() || message.isEmpty()) {
+//            return false;
+//        }
+//        synchronized (this)
+//        {
+//            String requestUrl = httpServletRequest.getRequestURI();
+//            StringBuffer messageLog = httpServletRequest.getRequestURL();
+//            messageLog.append("[").append(tag).append("]").append("[level:").append(level).append("]").append("[").append(requestUrl).append("]:").append(message);
+//            logger.info(messageLog);
+//        }
         return true;
     }
 

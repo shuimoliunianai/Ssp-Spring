@@ -4,22 +4,17 @@ package config;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.CacheManager;
-import org.springframework.cache.support.CompositeCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.data.redis.cache.RedisCacheManager;
-import org.springframework.data.redis.connection.RedisConnectionFactory;
-import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.orm.hibernate4.LocalSessionFactoryBean;
 import redis.clients.jedis.JedisPoolConfig;
+import redis.clients.jedis.JedisShardInfo;
+import redis.clients.jedis.ShardedJedisPool;
 
 import javax.sql.DataSource;
 import java.util.ArrayList;
@@ -73,66 +68,73 @@ public class AppConfiguration {
     }
 
     /**
-     * 配置Reids
+     * Redis 线程池配置类
+     * @return
      */
     @Bean
-    public RedisConnectionFactory redisCf()
+    public JedisPoolConfig jedisPoolConfig()
     {
-        logger.info("Start init redis ");
-        JedisConnectionFactory cf = new JedisConnectionFactory();
-        cf.setHostName(env.getProperty("spring.redis.host"));
-        cf.setDatabase(Integer.parseInt(env.getProperty("spring.redis.database")));
-        cf.setUsePool(true);
-        cf.setPoolConfig(getRedisPoolConfig());
-        cf.setTimeout(Integer.parseInt(env.getProperty("spring.redis.timeout")));
-        return cf;
+        JedisPoolConfig jedisPoolConfig = new JedisPoolConfig();
+        jedisPoolConfig.setMaxWaitMillis(Integer.valueOf(env.getProperty("spring.redis.pool.max-wait")));
+        jedisPoolConfig.setMaxIdle(Integer.valueOf(env.getProperty("spring.redis.pool.max-idle")));
+        jedisPoolConfig.setMaxTotal(Integer.valueOf(env.getProperty("spring.redis.pool.max-active")));
+        jedisPoolConfig.setMinIdle(Integer.valueOf(env.getProperty("spring.redis.pool.min-idle")));
+        jedisPoolConfig.setTestOnReturn(true);
+        return jedisPoolConfig;
     }
 
     /**
-     * 配置redis 链接池
+     * Redis 集群
+     */
+    @Bean
+    public ShardedJedisPool shardedJedisPool()
+    {
+        List<JedisShardInfo> redisList = new ArrayList<JedisShardInfo>();
+        redisList.add(masterJedisShardInfo());
+        redisList.add(slave1JedisShardInfo());
+        redisList.add(slave2JedisShardInfo());
+        return new ShardedJedisPool(jedisPoolConfig(),redisList);
+    }
+
+    /**
+     * Mater Redis
+     */
+    @Bean
+    public JedisShardInfo masterJedisShardInfo()
+    {
+        String host = env.getProperty("spring.redis.master.uri");
+        return new JedisShardInfo(host);
+    }
+
+    /**
+     * Slave1 Redis
+     */
+    @Bean
+    public JedisShardInfo slave1JedisShardInfo()
+    {
+        String host = env.getProperty("spring.redis.slave1.uri");
+        return new JedisShardInfo(host);
+    }
+
+    /**
+     * Slave2 Redis
+     */
+    @Bean
+    public JedisShardInfo slave2JedisShardInfo()
+    {
+        String host = env.getProperty("spring.redis.slave2.uri");
+        return new JedisShardInfo(host);
+    }
+
+    /**
+     * reids serializer
      * @return
      */
-
-    @Bean
-    public JedisPoolConfig getRedisPoolConfig()
-    {
-        logger.info("Start init redis pool ");
-        JedisPoolConfig config = new JedisPoolConfig();
-        config.setMaxActive(Integer.parseInt(env.getProperty("spring.redis.pool.max-active")));
-        config.setMaxWait(Integer.parseInt(env.getProperty("spring.redis.pool.max-wait")));
-        config.setMaxIdle(Integer.parseInt(env.getProperty("spring.redis.pool.max-idle")));
-        config.setMinIdle(Integer.parseInt(env.getProperty("spring.redis.pool.min-idle")));
-        return config;
-    }
-
-    @Bean
-    public StringRedisTemplate stringRedisTemplate(RedisConnectionFactory cf)
-    {
-        logger.info("Start init redis template ");
-        return new StringRedisTemplate(cf);
-    }
-
     @Bean
     public StringRedisSerializer stringRedisSerializer()
     {
         logger.info("Start init redis serialzer ");
         return new StringRedisSerializer();
-    }
-
-    /**
-     * 缓存管理器
-     */
-    @Bean
-    public CacheManager cacheManager(RedisTemplate redisTemplate)
-    {
-        logger.info("Start init Cache ");
-        CompositeCacheManager compositeCacheManager = new CompositeCacheManager();
-        List<CacheManager> managers = new ArrayList<CacheManager>();
-        RedisCacheManager redisCacheManager = new RedisCacheManager(redisTemplate);
-        redisCacheManager.setDefaultExpiration(3600);
-        managers.add(redisCacheManager);
-        compositeCacheManager.setCacheManagers(managers);
-        return compositeCacheManager;
     }
 }
 

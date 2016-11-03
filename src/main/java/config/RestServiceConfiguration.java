@@ -7,6 +7,7 @@ import org.hibernate.validator.HibernateValidator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.validation.Validator;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
@@ -27,6 +28,7 @@ import java.util.Locale;
 @Configuration
 @EnableWebMvc
 @ComponentScan("org.gameloft.www")
+@Import(SocketConfiguration.class)
 public class RestServiceConfiguration extends WebMvcConfigurerAdapter {
 
 
