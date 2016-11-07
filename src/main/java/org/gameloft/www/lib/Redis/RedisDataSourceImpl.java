@@ -21,17 +21,26 @@ public class RedisDataSourceImpl implements RedisDataSource {
     ShardedJedisPool shardedJedisPool;
 
     /**
+     * ThreadLocal
+     */
+    private static final ThreadLocal<ShardedJedis> threadLocal = new ThreadLocal<ShardedJedis>();
+
+    /**
      * get Redis Client
      * @return
      */
     public  ShardedJedis getRedisClient() {
-        try {
-            ShardedJedis shardJedis = shardedJedisPool.getResource();
-            return shardJedis;
-        } catch (Exception e) {
-            logger.error("getRedisClent error", e);
+        ShardedJedis shardedJedis = threadLocal.get();
+        if (shardedJedis == null)
+        {
+            try {
+                shardedJedis = shardedJedisPool.getResource();
+                threadLocal.set(shardedJedis);
+            } catch (Exception e) {
+                logger.error("getRedisClent error", e);
+            }
         }
-        return null;
+        return shardedJedis;
     }
 
 }
