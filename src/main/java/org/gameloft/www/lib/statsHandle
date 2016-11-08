@@ -1,0 +1,163 @@
+package org.gameloft.www.lib.Stats;
+
+import org.apache.log4j.Logger;
+import org.gameloft.www.lib.Redis.RedisClientTemplate;
+import org.gameloft.www.model.Partner;
+import org.gameloft.www.model.Payload;
+import org.gameloft.www.model.Request;
+import org.joda.time.LocalDateTime;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+
+/**
+ * Created by ningzhen.ge on 2016/11/3.
+ */
+@Component
+public class StatsHandle {
+
+    /**
+     * Redis Client
+     */
+    @Autowired
+    private RedisClientTemplate redisClientTemplate;
+
+    /**
+     * Logger
+     */
+    private static final Logger logger = Logger.getLogger(StatsHandle.class);
+
+    /**
+     * ThreadLocal
+     */
+    private static final ThreadLocal<Payload> threadLocal = new ThreadLocal<Payload>();
+
+    /**
+     * Increment System Keys
+     */
+    public Boolean incrementDailySystemKeys(String hash, String key) {
+        if (StringUtils.isEmpty(hash) || StringUtils.isEmpty(key)) {
+            return false;
+        }
+        StringBuffer videoTag;
+        StringBuffer hashValue = new StringBuffer("aggregated").append(":").append(key);
+        Payload payload = getPayload();
+        Request request = payload.getRequest();
+        StringBuffer adTypeKey = new StringBuffer("");
+        StringBuffer countries = new StringBuffer("");
+
+        if (!request.getType().isEmpty()) {
+            adTypeKey = new StringBuffer("ad_type:").append(request.getType()).append(":").append(key);
+            if ("video".equals(request.getType())) {
+                if (request.getIv() != null && request.getIv().equals(1)) {
+                    videoTag = new StringBuffer("iv");
+                } else {
+                    videoTag = new StringBuffer("niv");
+                }
+                adTypeKey = new StringBuffer("ad_type:").append(request.getType()).append("_").append(videoTag).append(":").append(key);
+            }
+        }
+        if (!request.getCountry().isEmpty()) {
+            countries = new StringBuffer("countries:").append(request.getCountry().toLowerCase()).append(":").append(key);
+        }
+        if (StringUtils.isEmpty(hashValue) || StringUtils.isEmpty(adTypeKey) || StringUtils.isEmpty(countries)) {
+            return false;
+        }
+
+        Set<String> arguments = new HashSet<String>();
+        arguments.add(hashValue.toString());
+        arguments.add(adTypeKey.toString());
+        arguments.add(countries.toString());
+        redisClientTemplate.addHincrByToPipline(hash,arguments);
+        return true;
+    }
+
+    /**
+     * Increment Partner Keys
+     */
+    public Boolean incrementDailyPartnerKeys(String hash, String key,String partnerName)
+    {
+        if (StringUtils.isEmpty(hash) || StringUtils.isEmpty(key) || StringUtils.isEmpty(partnerName))
+        {
+            logger.error("incrementDailyPartnerKeys: parameters invalid: hash:"+hash+" key:"+key+" partnerName:"+ partnerName+" on: "+getTime());
+        }
+        Boolean isHasPartner = false;
+        StringBuffer campaigns = new StringBuffer("");
+        Payload payload = getPayload();
+
+        ArrayList<Partner> partnerList =(ArrayList<Partner>) payload.getPartners();
+        Iterator<Partner> iterator = partnerList.iterator();
+        while (iterator.hasNext())
+        {
+            Partner partner = iterator.next();
+            if (partner.getName().equals(partnerName))
+            {
+                isHasPartner = true;
+                if (partner.getCampaignId().equals(0) || partner.getCampaignId().equals("")) {
+                    logger.error("incrementDailyPartnerKeys: campaigns invalid  on: "+getTime());
+                    return false;
+                }
+                campaigns.append("campaigns:").append(partner.getCampaignId()).append(":").append(key);
+                break;
+            }
+        }
+        if (!isHasPartner)
+        {
+            logger.error("incrementDailyPartnerKeys: partner name invalid: hash: can't find partner by partner name. :on: "+getTime());
+            return false;
+        }
+        if (StringUtils.isEmpty(campaigns))
+        {
+            logger.error("incrementDailyPartnerKeys: campaign invalid :on: "+getTime());
+            return false;
+        }
+        Set<String> arguments = new HashSet<String>();
+        arguments.add(campaigns.toString());
+        redisClientTemplate.addHincrByToPipline(hash,arguments);
+        Boolean result = incrementDailySystemKeys(hash,key);
+        if (!result)
+        {
+            logger.error("incrementDailyPartnerKeys: faild. :on: "+getTime());
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * set Payload
+     */
+    public void setPayLoad(Payload payLoad) {
+        try {
+            threadLocal.set(payLoad);
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+        }
+    }
+
+    /**
+     * get PayLoad
+     */
+    private Payload getPayload() {
+        Payload payload = null;
+        try {
+            payload = threadLocal.get();
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+        }
+        return payload;
+    }
+
+    /**
+     * get format time
+     */
+    private String getTime()
+    {
+        LocalDateTime today = LocalDateTime.now();
+        return today.toString();
+    }
+}
