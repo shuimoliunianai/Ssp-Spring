@@ -1,15 +1,16 @@
 package org.gameloft.www.lib.Stats;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.gameloft.www.lib.Redis.RedisClientTemplate;
 import org.gameloft.www.model.Partner;
 import org.gameloft.www.model.Payload;
 import org.gameloft.www.model.Request;
-import org.joda.time.LocalDateTime;
+import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -22,50 +23,56 @@ import java.util.Set;
 public class StatsHandle {
 
     /**
-     * Redis Client
+     * Redis Client 。
      */
     @Autowired
     private RedisClientTemplate redisClientTemplate;
 
     /**
-     * Logger
+     * LOGGER 。
      */
-    private static final Logger logger = Logger.getLogger(StatsHandle.class);
+    private static final Logger LOGGER = Logger.getLogger(StatsHandle.class);
 
     /**
-     * ThreadLocal
+     * ThreadLocal 。
      */
-    private static final ThreadLocal<Payload> threadLocal = new ThreadLocal<Payload>();
+    private static final ThreadLocal<Payload> THREADLOCAL = new ThreadLocal<Payload>();
 
     /**
-     * Increment System Keys
+     * STATSVERSION 2 。
      */
-    public Boolean incrementDailySystemKeys(String hash, String key) {
+    private static final int STATSVERSIONV2 = 3;
+
+    /**
+     * STATSVERSION 3 。
+     */
+    private static final int STATSVERSIONV3 = 4;
+
+    /***
+     * @param hash 。
+     * @param key 。
+     * @return true/false 。
+     */
+    public final Boolean incrementDailySystemKeys(final String hash, final String key) {
         if (StringUtils.isEmpty(hash) || StringUtils.isEmpty(key)) {
             return false;
         }
-        StringBuffer videoTag;
-        StringBuffer hashValue = new StringBuffer("aggregated").append(":").append(key);
+        StringBuilder hashValue = new StringBuilder("aggregated").append(":").append(key);
         Payload payload = getPayload();
+        if (payload == null) {
+            return false;
+        }
         Request request = payload.getRequest();
-        StringBuffer adTypeKey = new StringBuffer("");
-        StringBuffer countries = new StringBuffer("");
 
-        if (!request.getType().isEmpty()) {
-            adTypeKey = new StringBuffer("ad_type:").append(request.getType()).append(":").append(key);
-            if ("video".equals(request.getType())) {
-                if (request.getIv() != null && request.getIv().equals(1)) {
-                    videoTag = new StringBuffer("iv");
-                } else {
-                    videoTag = new StringBuffer("niv");
-                }
-                adTypeKey = new StringBuffer("ad_type:").append(request.getType()).append("_").append(videoTag).append(":").append(key);
-            }
+        StringBuffer adTypeKey = getAdTypeFromRequest(request);
+        StringBuffer countries = getCountryFromRequest(request);
+        if (adTypeKey == null || countries == null) {
+            LOGGER.error("incrementDailySystemKeys: can't get request ad type or countries");
+            return false;
         }
-        if (!request.getCountry().isEmpty()) {
-            countries = new StringBuffer("countries:").append(request.getCountry().toLowerCase()).append(":").append(key);
-        }
-        if (StringUtils.isEmpty(hashValue) || StringUtils.isEmpty(adTypeKey) || StringUtils.isEmpty(countries)) {
+        adTypeKey.append(key);
+        countries.append(key);
+        if (StringUtils.isEmpty(hashValue.toString()) || StringUtils.isEmpty(adTypeKey.toString()) || StringUtils.isEmpty(countries.toString())) {
             return false;
         }
 
@@ -73,91 +80,345 @@ public class StatsHandle {
         arguments.add(hashValue.toString());
         arguments.add(adTypeKey.toString());
         arguments.add(countries.toString());
-        redisClientTemplate.addHincrByToPipline(hash,arguments);
+        redisClientTemplate.addHincrByToPipline(hash, arguments);
         return true;
     }
 
     /**
-     * Increment Partner Keys
+     * @param hash        。
+     * @param key         。
+     * @param partnerName 。
+     * @return true/false 。
      */
-    public Boolean incrementDailyPartnerKeys(String hash, String key,String partnerName)
-    {
-        if (StringUtils.isEmpty(hash) || StringUtils.isEmpty(key) || StringUtils.isEmpty(partnerName))
-        {
-            logger.error("incrementDailyPartnerKeys: parameters invalid: hash:"+hash+" key:"+key+" partnerName:"+ partnerName+" on: "+getTime());
+    public final Boolean incrementDailyPartnerKeys(final String hash, final String key, final String partnerName) {
+        if (StringUtils.isEmpty(hash) || StringUtils.isEmpty(key) || StringUtils.isEmpty(partnerName)) {
+            LOGGER.error("incrementDailyPartnerKeys: parameters invalid: hash:"
+                    + hash + " key:" + key + " partnerName:" + partnerName
+                    + " on: " + getTime()
+            );
         }
         Boolean isHasPartner = false;
-        StringBuffer campaigns = new StringBuffer("");
+        StringBuilder campaigns = new StringBuilder("");
         Payload payload = getPayload();
 
-        ArrayList<Partner> partnerList =(ArrayList<Partner>) payload.getPartners();
+        ArrayList<Partner> partnerList = (ArrayList<Partner>) payload.getPartners();
         Iterator<Partner> iterator = partnerList.iterator();
-        while (iterator.hasNext())
-        {
+        while (iterator.hasNext()) {
             Partner partner = iterator.next();
-            if (partner.getName().equals(partnerName))
-            {
+            if (partner.getName().equals(partnerName)) {
                 isHasPartner = true;
-                if (partner.getCampaignId().equals(0) || partner.getCampaignId().equals("")) {
-                    logger.error("incrementDailyPartnerKeys: campaigns invalid  on: "+getTime());
+                if (partner.getCampaignId() == null) {
+                    LOGGER.error("incrementDailyPartnerKeys: campaigns invalid  on: " + getTime());
                     return false;
                 }
                 campaigns.append("campaigns:").append(partner.getCampaignId()).append(":").append(key);
                 break;
             }
         }
-        if (!isHasPartner)
-        {
-            logger.error("incrementDailyPartnerKeys: partner name invalid: hash: can't find partner by partner name. :on: "+getTime());
+        if (!isHasPartner) {
+            LOGGER.error("incrementDailyPartnerKeys: partner name invalid: hash: can't find partner by partner name. :on: " + getTime());
             return false;
         }
-        if (StringUtils.isEmpty(campaigns))
-        {
-            logger.error("incrementDailyPartnerKeys: campaign invalid :on: "+getTime());
+        if (StringUtils.isEmpty(campaigns.toString())) {
+            LOGGER.error("incrementDailyPartnerKeys: campaign invalid :on: " + getTime());
             return false;
         }
         Set<String> arguments = new HashSet<String>();
         arguments.add(campaigns.toString());
-        redisClientTemplate.addHincrByToPipline(hash,arguments);
-        Boolean result = incrementDailySystemKeys(hash,key);
-        if (!result)
-        {
-            logger.error("incrementDailyPartnerKeys: faild. :on: "+getTime());
+        redisClientTemplate.addHincrByToPipline(hash, arguments);
+        Boolean result = incrementDailySystemKeys(hash, key);
+        if (!result) {
+            LOGGER.error("incrementDailyPartnerKeys: faild. :on: " + getTime());
             return false;
         }
         return true;
     }
 
     /**
-     * set Payload
+     * @param key          。
+     * @param forcePartner 。
+     * @return true/false 。
      */
-    public void setPayLoad(Payload payLoad) {
+    public final Boolean incrementDailyKey(final String key, final String forcePartner) {
+        if (StringUtils.isEmpty(key) || StringUtils.isEmpty(forcePartner)) {
+            LOGGER.error("incrementDailyPartnerKeys: parameters invalid:  key:" + key + " forcePartner:" + forcePartner + " on: " + getTime());
+            return false;
+        }
+        ArrayList<String> keys = new ArrayList<String>();
+        if (StringUtils.contains(key, ":")) {
+            String[] keyArray = StringUtils.split(key, ":");
+            int keyArrayCount = keyArray.length;
+            StringBuffer newKey = new StringBuffer(keyArray[0]);
+            keys.add(newKey.toString());
+            for (int i = 1; i < keyArrayCount; i++) {
+                newKey = newKey.append(":").append(keyArray[i]);
+                keys.add(newKey.toString());
+            }
+        } else {
+            keys.add(key);
+        }
+        for (String processKey : keys) {
+            if (!StringUtils.isEmpty(processKey)) {
+                incrementDailyPartnerKeys("stats:" + forcePartner.toLowerCase() + ":" + getTime(), processKey, forcePartner);
+                incrementDailySystemKeys("stats:system: " + getTime(), processKey);
+            } else if (!getPayload().getPartners().isEmpty() && getPayload().getPartners().size() > 0) {
+                for (Partner partner : getPayload().getPartners()) {
+                    incrementDailyPartnerKeys("stats" + partner.getName().toLowerCase() + ":" + getTime(), processKey, partner.getName());
+                }
+                incrementDailySystemKeys("stats:system: " + getTime(), processKey);
+            } else {
+                incrementDailySystemKeys("stats:system:" + getTime(), processKey);
+            }
+        }
+        return true;
+    }
+
+    /**
+     * @param key     。
+     * @param partner 。
+     * @param version 。
+     * @return true/false 。
+     */
+    private boolean incrementKey(final String key, final Partner partner, final int version) {
+        if (StringUtils.isEmpty(key) || partner == null) {
+            return false;
+        }
+        String date = getTime();
+        Payload payload = getPayload();
+        Request request = payload.getRequest();
+        StringBuffer adType;
+        Integer campaignId = getCompingFromPartner(partner);
+        StringBuffer country = getCountryFromRequest(request);
+        String productId = getProductIdFromRequest(request);
+        adType = getAdTypeFromRequest(request, true);
+
+        if (adType == null || country == null || productId == null) {
+            LOGGER.error("incrementKey: parameters is Invalid:  adType:"
+                    + adType + " country:" + country
+                    + " productId:" + productId + " on:" + getTime()
+            );
+            return false;
+        }
+        Set<String> arguments = new HashSet<String>();
+        arguments.add(campaignId + ":" + country + productId + key);
+        redisClientTemplate.addHincrByToPipline("stats_v" + version + ":" + partner.getName().toLowerCase() + date, arguments);
+        return true;
+    }
+
+    /**
+     * @param key 。
+     * @return true/false 。
+     */
+    private Boolean incrementKeyPointcutInvestigation(final String key) {
+        if (key.isEmpty()) {
+            return false;
+        }
+        String hasKey = "pointcut_investigation:" + getTime();
+        Payload payload = getPayload();
+        Request request = payload.getRequest();
+
+        StringBuffer adType = getAdTypeFromRequest(request);
+        String productId = getProductIdFromRequest(request);
+        if (adType == null || productId == null) {
+            LOGGER.error("incrementKeyPointcutInvestigation: parameters is Invalid:  key:" + key + " on:" + getTime());
+            return false;
+        }
+        String keyNew = productId + adType.toString() + key;
+        Set<String> arguments = new HashSet<String>();
+        arguments.add(keyNew);
+        redisClientTemplate.addHincrByToPipline(hasKey, arguments);
+        return true;
+    }
+
+    /**
+     * @param key     。
+     * @param partner 。
+     * @return true/false 。
+     */
+    public final Boolean incrementStatsKey(final String key, final Partner partner) {
+        if (key.isEmpty()) {
+            LOGGER.error("incrementStatsKey: parameters is Invalid:  key:" + key + " on:" + getTime());
+            return false;
+        }
+        if (partner != null) {
+            incrementKey(key, partner, STATSVERSIONV2);
+            incrementKey(key, partner, STATSVERSIONV3);
+        } else if (!getPayload().getPartners().isEmpty() || getPayload().getPartners().size() > 0) {
+            for (Partner partner1 : getPayload().getPartners()) {
+                incrementKey(key, partner1, STATSVERSIONV2);
+                incrementKey(key, partner1, STATSVERSIONV3);
+            }
+        }
+        incrementKeyPointcutInvestigation(key);
+        return true;
+    }
+
+    /**
+     * @param key        。
+     * @param partner    。
+     * @param creativeId 。
+     * @return true/false 。
+     */
+    public final Boolean incrementCreativeStats(final String key, final Partner partner, final String creativeId) {
+        if (partner == null || key.isEmpty() || creativeId.isEmpty()) {
+            LOGGER.error("incrementCreativeStats: parameters is Invalid:  key:" + key + " on:" + getTime());
+            return false;
+        }
         try {
-            threadLocal.set(payLoad);
+            String newCreativeId = URLEncoder.encode(creativeId, "utf-8");
+            Payload payload = getPayload();
+            Request request = payload.getRequest();
+            StringBuffer country = getCountryFromRequest(request);
+            String productId = getProductIdFromRequest(request);
+
+            if (country == null || productId == null) {
+                LOGGER.error("incrementCreativeStats: parameters is Invalid:  country and product:" + getTime());
+                return false;
+            }
+            String newKey = newCreativeId + ":" + country.toString() + productId + key;
+            Set<String> arguments = new HashSet<String>();
+            arguments.add(newKey);
+            redisClientTemplate.addHincrByToPipline("stats_creatives:" + partner.getName().toLowerCase() + ":" + getTime(), arguments);
+            return true;
         } catch (Exception e) {
-            logger.error(e.getMessage());
+            LOGGER.error(e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * @param request 。
+     * @return true/false 。
+     */
+    private StringBuffer getAdTypeFromRequest(final Request request) {
+        if (request == null) {
+            return null;
+        }
+        StringBuffer adTypeKey = new StringBuffer("");
+        StringBuffer videoTag;
+        if (!request.getType().isEmpty()) {
+            adTypeKey = new StringBuffer("ad_type:").append(request.getType()).append(":");
+            if ("video".equals(request.getType())) {
+                if (request.getIv() != null && request.getIv().equals(1)) {
+                    videoTag = new StringBuffer("iv");
+                } else {
+                    videoTag = new StringBuffer("niv");
+                }
+                adTypeKey = new StringBuffer("ad_type:").append(request.getType()).append("_").append(videoTag).append(":");
+            }
+        }
+        if (StringUtils.isEmpty(adTypeKey.toString())) {
+            return null;
+        }
+        return adTypeKey;
+    }
+
+    /**
+     * @param request 。
+     * @param isMpu   。
+     * @return true/false 。
+     */
+    private StringBuffer getAdTypeFromRequest(final Request request, final Boolean isMpu) {
+        if (request == null) {
+            return null;
+        }
+        if (!isMpu) {
+            return null;
+        }
+        StringBuffer adType = new StringBuffer("");
+        if (request.getType().equals("fullscreen") && !request.getAd_size().isEmpty()) {
+            adType = adType.append(request.getType()).append("_320x250").append(":");
+        }
+        if (StringUtils.isEmpty(adType.toString())) {
+            adType = getAdTypeFromRequest(request);
+        }
+        return adType;
+    }
+
+
+    /**
+     * @param request 。
+     * @return countries 。
+     */
+    private StringBuffer getCountryFromRequest(final Request request) {
+        if (request == null) {
+            return null;
+        }
+        StringBuffer countries = new StringBuffer("");
+        if (!request.getCountry().isEmpty()) {
+            countries = countries.append("countries:").append(request.getCountry().toLowerCase()).append(":");
+        }
+        if (StringUtils.isEmpty(countries.toString())) {
+            return null;
+        }
+        return countries;
+    }
+
+    /**
+     * @param partner 。
+     * @return campingId 。
+     */
+    private Integer getCompingFromPartner(final Partner partner) {
+        if (partner == null) {
+            return null;
+        }
+        Integer campingId = 0;
+        campingId = partner.getCampaignId();
+        if (campingId.equals(0)) {
+            return null;
+        }
+        return campingId;
+    }
+
+    /**
+     * @param request 。
+     * @return productId 。
+     */
+    private String getProductIdFromRequest(final Request request) {
+        if (request == null) {
+            return null;
+        }
+        String productId = request.getProductId();
+        if (StringUtils.isEmpty(productId)) {
+            return null;
+        }
+        return productId + ":";
+    }
+
+    /**
+     * @param payLoad 。
+     */
+    public final void setPayLoad(final Payload payLoad) {
+        try {
+            THREADLOCAL.set(payLoad);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
         }
     }
 
     /**
      * get PayLoad
+     *
+     * @return payload 。
      */
     private Payload getPayload() {
         Payload payload = null;
         try {
-            payload = threadLocal.get();
+            payload = THREADLOCAL.get();
         } catch (Exception e) {
-            logger.error(e.getMessage());
+            LOGGER.error(e.getMessage());
+        }
+        if (payload == null) {
+            LOGGER.error("the payload invalid ");
         }
         return payload;
     }
 
     /**
-     * get format time
+     * @return time 。
      */
-    private String getTime()
-    {
-        LocalDateTime today = LocalDateTime.now();
+    private String getTime() {
+        LocalDate today = LocalDate.now();
         return today.toString();
     }
 }
